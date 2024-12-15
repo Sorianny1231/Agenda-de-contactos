@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda de Contactos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f4f4f9; 
+    }
+
+    main {
+      margin-top: 50px; 
+      width: 100%;
+      max-width: 900px; 
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    form {
+      width: 100%;
+      max-width: 600px; 
+      margin: 0 auto 20px;
+      padding: 20px;
+      border-radius: 12px;
+      background: linear-gradient(to bottom, #ffb3ff, #c299ff); 
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    input, textarea {
+      background-color: #fff5ff; 
+    }
+
+    button {
+      cursor: pointer;
+      background-color: #8c52ff; 
+      color: #fff;
+      border: none;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #6a39cc;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+      box-sizing: border-box; 
+    }
+
+    table, th, td {
+      border: 2px solid #ddd; 
+      border-radius: 8px;
+    }
+
+    th, td {
+      padding: 12px;
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer; 
+    }
+
+    img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    h1, h2 {
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .contact-list-container {
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <main>
+    <h1>Agenda de Contactos</h1>
+
+    
+    <form id="contactForm">
+      <label for="image">Imagen:</label>
+      <input type="file" id="image" accept="image/*">
+
+      <label for="name">Nombre:</label>
+      <input type="text" id="name" placeholder="Nombre completo" required>
+
+      <label for="email">Correo:</label>
+      <input type="email" id="email" placeholder="Correo electrónico" required>
+
+      <label for="phone">Teléfono:</label>
+      <input type="tel" id="phone" placeholder="Teléfono" required>
+
+      <label for="social">Redes Sociales:</label>
+      <input type="text" id="social" placeholder="Enlaces de redes sociales">
+
+      <label for="comment">Comentario:</label>
+      <textarea id="comment" placeholder="Comentarios"></textarea>
+
+      <button type="button" id="submitButton" onclick="addContact()">Guardar Contacto</button>
+    </form>
+
+
+    <h2>Lista de Contactos</h2>
+    <div class="contact-list-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Imagen</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Teléfono</th>
+            <th>Redes Sociales</th>
+            <th>Comentario</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="contactList">
+          
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    let currentContactIndex = null; 
+
+    function addContact() {
+      const imageInput = document.getElementById('image');
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const social = document.getElementById('social').value;
+      const comment = document.getElementById('comment').value;
+
+      if (!name || !email || !phone) {
+        alert('Por favor, completa los campos obligatorios.');
+        return;
+      }
+
+      const contactList = document.getElementById('contactList');
+      const row = document.createElement('tr');
+
+      const imageCell = document.createElement('td');
+      if (imageInput.files && imageInput.files[0]) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(imageInput.files[0]);
+        img.onload = () => URL.revokeObjectURL(img.src);
+        imageCell.appendChild(img);
+      } else {
+        imageCell.textContent = 'Sin imagen';
+      }
+
+      row.appendChild(imageCell);
+      row.innerHTML += `
+        <td>${name}</td>
+        <td>${email}</td>
+        <td>${phone}</td>
+        <td>${social}</td>
+        <td>${comment}</td>
+        <td class="actions">
+          <button onclick="deleteContact(this)">Eliminar</button>
+        </td>
+      `;
+
+
+      if (currentContactIndex !== null) {
+        contactList.replaceChild(row, contactList.children[currentContactIndex]);
+      } else {
+        contactList.appendChild(row);
+      }
+
+      
+      document.getElementById('contactForm').reset();
+      document.getElementById('submitButton').textContent = 'Guardar Contacto';
+      currentContactIndex = null; 
+    }
+
+    function deleteContact(button) {
+      const row = button.parentElement.parentElement;
+      const contactList = document.getElementById('contactList');
+      contactList.removeChild(row);
+    }
+
+    
+    function editContactRow(event) {
+      const row = event.target.closest('tr');
+      const cells = row.children;
+
+      
+      document.getElementById('name').value = cells[1].textContent;
+      document.getElementById('email').value = cells[2].textContent;
+      document.getElementById('phone').value = cells[3].textContent;
+      document.getElementById('social').value = cells[4].textContent;
+      document.getElementById('comment').value = cells[5].textContent;
+
+      
+      document.getElementById('submitButton').textContent = 'Actualizar Contacto';
+
+      
+      currentContactIndex = Array.from(row.parentNode.children).indexOf(row);
+    }
+
+    document.getElementById('contactList').addEventListener('click', function(event) {
+      if (event.target.tagName === 'TD') {
+        editContactRow(event);
+      }
+    });
+  </script>
+
+</body>
+</html>
